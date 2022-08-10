@@ -1,22 +1,28 @@
 import { StatusCodes as HTTP_STATUS_CODES } from "http-status-codes";
-
-import todoService from "../services/todo.service.js";
+import todos from "../models/Todo.js";
 
 function getAll(req, res) {
-  const todos = todoService.getAllTodos();
-  res.send(todos);
+  todos.find((error, result) => {
+    if (error) {
+      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send();
+      return;
+    }
+
+    res.send(result);
+  });
 }
 
 function getById(req, res) {
   const id = req.params["id"];
-  const todo = todoService.getTodoById(id);
 
-  if (!todo) {
-    res.status(HTTP_STATUS_CODES.NOT_FOUND).send();
-    return;
-  }
+  todos.findById(id, (error, result) => {
+    if (error) {
+      res.status(HTTP_STATUS_CODES.NOT_FOUND).send();
+      return;
+    }
 
-  res.send(todo);
+    res.send(result);
+  });
 }
 
 function create(req, res) {
@@ -27,9 +33,24 @@ function create(req, res) {
     return;
   }
 
-  const newTodo = todoService.createTodo(body);
+  const date = new Date().toISOString();
+  const newTodo = {
+    ...body,
+    createdAt: date,
+    updatedAt: date,
+    isCompleted: false,
+  };
 
-  res.status(HTTP_STATUS_CODES.CREATED).send(newTodo);
+  const todo = new todos(newTodo);
+  todo.save((error) => {
+    if (error) {
+      const { message } = error;
+      res.status(HTTP_STATUS_CODES.BAD_REQUEST).send({ error: message });
+      return;
+    }
+
+    res.status(HTTP_STATUS_CODES.CREATED).send(todo.toJSON());
+  });
 }
 
 function updateById(req, res) {
@@ -41,31 +62,27 @@ function updateById(req, res) {
     return;
   }
 
-  const index = todoService.getIndexById(id);
+  todos.findByIdAndUpdate(id, { $set: body }, (error) => {
+    if (error) {
+      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send();
+      return;
+    }
 
-  if (index === -1) {
-    res.status(HTTP_STATUS_CODES.NOT_FOUND).send();
-    return;
-  }
-
-  todoService.updateTodoById(id, body);
-
-  res.status(HTTP_STATUS_CODES.NO_CONTENT).send();
+    res.send({ message: "Todo successfully updated." });
+  });
 }
 
 function deleteById(req, res) {
   const id = req.params["id"];
 
-  const index = todoService.getIndexById(id);
+  todos.findByIdAndDelete(id, (error) => {
+    if (error) {
+      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send();
+      return;
+    }
 
-  if (index === -1) {
-    res.status(HTTP_STATUS_CODES.NOT_FOUND).send();
-    return;
-  }
-
-  todoService.deleteTodoById(id);
-
-  res.status(HTTP_STATUS_CODES.NO_CONTENT).send();
+    res.status(HTTP_STATUS_CODES.NO_CONTENT).send();
+  });
 }
 
 export default {
