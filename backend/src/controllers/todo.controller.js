@@ -1,12 +1,10 @@
 import { StatusCodes as HTTP_STATUS_CODES } from "http-status-codes";
 import todos from "../models/Todo.js";
+import { badRequest, internalServerError } from "../utils/utils.js";
 
 function getAll(req, res) {
   todos.find((error, result) => {
-    if (error) {
-      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send();
-      return;
-    }
+    if (error) return internalServerError(res);
 
     res.send(result);
   });
@@ -28,10 +26,7 @@ function getById(req, res) {
 function create(req, res) {
   const body = req.body;
 
-  if (Object.keys(body).length === 0) {
-    res.status(HTTP_STATUS_CODES.BAD_REQUEST).send();
-    return;
-  }
+  if (Object.keys(body).length === 0) return badRequest(res);
 
   const date = new Date().toISOString();
   const newTodo = {
@@ -63,10 +58,7 @@ function updateById(req, res) {
   }
 
   todos.findByIdAndUpdate(id, { $set: body }, (error) => {
-    if (error) {
-      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send();
-      return;
-    }
+    if (error) return internalServerError(res);
 
     res.send({ message: "Todo successfully updated." });
   });
@@ -76,10 +68,7 @@ function deleteById(req, res) {
   const id = req.params["id"];
 
   todos.findByIdAndDelete(id, (error) => {
-    if (error) {
-      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send();
-      return;
-    }
+    if (error) return internalServerError(res);
 
     res.status(HTTP_STATUS_CODES.NO_CONTENT).send();
   });
