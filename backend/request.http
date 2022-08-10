@@ -1,0 +1,29 @@
+GET http://localhost:3000
+
+###
+GET http://localhost:3000/f097d414-4cca-40df-8b01-32c616b2dfc9
+
+###
+POST http://localhost:3000
+Content-Type: application/json
+
+###
+POST http://localhost:3000
+Content-Type: application/json
+
+{
+  "title": "Estudar Angular",
+  "description": "Criar um projeto simples com Angular"
+}
+
+###
+PUT http://localhost:3000/f097d414-4cca-40df-8b01-32c616b2dfc9
+Content-Type: application/json
+
+{
+  "title": "Estudar Angular",
+  "description": "Criar um projeto simples com Angular"
+}
+
+###
+DELETE http://localhost:3000/f097d414-4cca-40df-8b01-32c616b2dfc9
