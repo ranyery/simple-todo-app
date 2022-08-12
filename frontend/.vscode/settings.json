@@ -1,0 +1,7 @@
+{
+  "files.exclude": {
+    ".angular": true,
+    "node_modules": true,
+    "src/**/*.spec.ts": true
+  }
+}
